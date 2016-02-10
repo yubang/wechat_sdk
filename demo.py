@@ -5,7 +5,7 @@ import wechat_sdk
 
 
 app = Flask(__name__)
-access_token = '9Em_q4EJOlYyU0l6EeXQzfK_scKjtJfLdo1LT3D97fkE40GRcOkegRVTjyuHnk8KCnDylt5HxbAXPd7O_c2L6iegDday72wIR1vs8-HaNPk_hs79rYISA4nAYRJYEUiOEWNcABAXPG'
+access_token = 'u_ZREHGyc8GYhPUe90DhBNHabG_t5al0xjSNzaNbdpN9rTOPxSoDoFv3efVVnrhvLTxYooedN6RgkpAQlXwRlkKM5Whgkb8d1cPLAU5jVVoV0oDrqd9GTQD0XXYPL2jePUBaAFAWBI'
 
 
 @app.route('/get_access_token', methods=['GET'])
@@ -43,6 +43,34 @@ def get_ticket_url():
     return wechat_sdk.get_ticket_url('gQEI8ToAAAAAAAAAASxodHRwOi8vd2VpeGluLnFxLmNvbS9xLzVqc19pdExsNldPUWg5VjNNaGNrAAIEpu_6VgMEAAAAAA==')
 
 
+@app.route('/set_template_industry')
+def set_template_industry():
+    print wechat_sdk.set_template_industry(access_token, 1, 5)
+    return "ok"
+
+
+@app.route('/get_template_id')
+def get_template_id():
+    print wechat_sdk.get_template_id(access_token, 'TM00001')
+    return 'ok'
+
+
+@app.route('/send_template_message')
+def send_template_message():
+    print wechat_sdk.send_template_message(access_token, '8rdEgQKL-N4tlvcvAbevA1c2QC8q7AaVhojI6xw5_18', {}, 'o4CfkwG89Xw0S79gXYDxBQ8qvg5c', 'http://www.baidu.com')
+    return "ok"
+
+
+@app.route('/get_all_templates')
+def get_all_templates():
+    print wechat_sdk.get_all_templates(access_token)
+    return 'ok'
+
+
+@app.route('/send_text_message')
+def send_text_message():
+    print wechat_sdk.send_text_message(access_token,  'o4CfkwG89Xw0S79gXYDxBQ8qvg5c', u'测试内容！')
+    return 'ok'
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)

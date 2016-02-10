@@ -6,9 +6,11 @@
 """
 
 
+from xml.dom.minidom import Document
 import requests
 import json
 import urllib
+import time
 
 
 request_timeout = 10
@@ -25,7 +27,7 @@ def __fetch_url(url, is_get=True, post_data=None):
     if is_get:
         r = requests.get(url, timeout=request_timeout)
     else:
-        r = requests.post(url, json.dumps(post_data), timeout=request_timeout)
+        r = requests.post(url, json.dumps(post_data, ensure_ascii=False), timeout=request_timeout)
 
     if r.status_code == 200:
         try:
@@ -153,3 +155,108 @@ def get_ticket_url(ticket):
     """
     url = 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s' % urllib.quote(ticket)
     return url
+
+
+def set_template_industry(access_token, industry_id1, industry_id2):
+    """
+    设置所属行业
+    行业代码请看：http://mp.weixin.qq.com/wiki/17/304c1885ea66dbedf7dc170d84999a9d.html#.E8.AE.BE.E7.BD.AE.E6.89.80.E5.B1.9E.E8.A1.8C.E4.B8.9A
+    :param access_token: 微信access_token
+    :param industry_id1: 行业代码1
+    :param industry_id2: 行业代码2
+    :return:
+    """
+    target_url = 'https://api.weixin.qq.com/cgi-bin/template/api_set_industry?access_token=%s' % access_token
+    result = __get_data_use_api(target_url, False, {"industry_id1": industry_id1, "industry_id2": industry_id2})
+    return result
+
+
+def get_template_id(access_token, template_id_short):
+    """
+    获取模板id
+    :param access_token: 微信access_token
+    :param template_id_short:模板库中模板的编号
+    :return:
+    """
+    target_url = 'https://api.weixin.qq.com/cgi-bin/template/api_add_template?access_token=%s' % access_token
+    result = __get_data_use_api(target_url, False, {"template_id_short": template_id_short})
+    return result
+
+
+def send_template_message(access_token, template_id, template_data, targer_open_id, target_url):
+    """
+    发送模版消息
+    :param access_token: 微信access_token
+    :param template_id: 模板id
+    :param template_data: 模板数据
+    :param targer_open_id: 目标用户open_id
+    :param target_url: 模板消息跳转的url
+    :return:
+    """
+    api_url = 'https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=%s' % access_token
+    result = __get_data_use_api(api_url, False, {
+        "touser": targer_open_id,
+        "template_id": template_id,
+        "url": target_url,
+        "data": template_data
+    })
+    return result
+
+
+def get_all_templates(access_token):
+    """
+    获取所有设置的模板
+    :param access_token: 微信access_token
+    :return:
+    """
+    target_url = 'https://api.weixin.qq.com/cgi-bin/template/get_all_private_template?access_token=%s' % access_token
+    result = __get_data_use_api(target_url)
+    return result
+
+
+def send_text_message(access_token,  target_open_id, text):
+    """
+    发送文本消息
+    :param access_token: 微信access_token
+    :param target_open_id: 目标用户open_id
+    :param text: 需要发送的文本内容
+    :return:
+    """
+    target_url = 'https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=%s' % access_token
+    result = __get_data_use_api(target_url, False, {"touser": target_open_id, "text": {"content": text.encode("UTF-8")}, "msgtype": 'text'})
+    return result
+
+
+# def send_text_message(access_token, source_wechat, target_open_id, text):
+#     """
+#     发送文本消息
+#     :param access_token: 微信access_token
+#     :param source_wechat: 微信号
+#     :param target_open_id: 目标用户open_id
+#     :param text: 需要发送的文本内容
+#     :return:
+#     """
+#     doc = Document()
+#     root = doc.createElement("xml")
+#
+#     attr = doc.createElement("ToUserName")
+#     attr.appendChild(doc.createTextNode(target_open_id))
+#     root.appendChild(attr)
+#
+#     attr = doc.createElement("FromUserName")
+#     attr.appendChild(doc.createTextNode(source_wechat))
+#     root.appendChild(attr)
+#
+#     attr = doc.createElement("CreateTime")
+#     attr.appendChild(doc.createTextNode(str(int(time.time()))))
+#     root.appendChild(attr)
+#
+#     attr = doc.createElement("MsgType")
+#     attr.appendChild(doc.createTextNode('text'))
+#     root.appendChild(attr)
+#
+#     attr = doc.createElement("Content")
+#     attr.appendChild(doc.createTextNode(text))
+#     root.appendChild(attr)
+#
+#     print root.toprettyxml()
