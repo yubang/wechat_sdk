@@ -5,7 +5,7 @@ import wechat_sdk
 
 
 app = Flask(__name__)
-access_token = 'u_ZREHGyc8GYhPUe90DhBNHabG_t5al0xjSNzaNbdpN9rTOPxSoDoFv3efVVnrhvLTxYooedN6RgkpAQlXwRlkKM5Whgkb8d1cPLAU5jVVoV0oDrqd9GTQD0XXYPL2jePUBaAFAWBI'
+access_token = 'dE_-_LLGsrJmpVVQ87c3GSGIqjG72f4_7sKojYbaN9aHHLoRw_AWBRSBI3wcncf10KniPYJu_O6HyDE_cy1xcinrWmfbNvgq4o2jcIDfVZXXdvO-bGREFpDBDAcqQ6weIEHcAGAVRU'
 
 
 @app.route('/get_access_token', methods=['GET'])
@@ -71,6 +71,40 @@ def get_all_templates():
 def send_text_message():
     print wechat_sdk.send_text_message(access_token,  'o4CfkwG89Xw0S79gXYDxBQ8qvg5c', u'测试内容！')
     return 'ok'
+
+
+@app.route('/send_media_message')
+def send_media_message():
+    print wechat_sdk.send_media_message(access_token, 'o4CfkwG89Xw0S79gXYDxBQ8qvg5c', 'OJ-mMeBQ4rxVCB1-jEBKUaUA9L-bh4rNPhqxGXDwzIHPvmm3HzBhQzcqzCHIAEGP', 'image')
+    return 'ok'
+
+
+@app.route('/update_media')
+def update_media():
+    with open('C:/Users/yubang/Desktop/1.jpg', 'rb') as fp:
+        print wechat_sdk.update_media(access_token, 'image', '1.jpg', fp.read())
+    return "ok"
+
+
+@app.route('/create_menu')
+def create_menu():
+    print wechat_sdk.create_menu(access_token, [{ "type":"view",
+               "name":"搜索",
+               "url":"http://www.soso.com/"}])
+    return "ok"
+
+
+@app.route('/get_menu')
+def get_menu():
+    print wechat_sdk.get_menu(access_token)
+    return "ok"
+
+
+@app.route('/delete_menu')
+def delete_menu():
+    print wechat_sdk.delete_menu(access_token)
+    return "ok"
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)

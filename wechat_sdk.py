@@ -3,6 +3,9 @@
 
 """
 微信公众号相关操作封装
+@author: yubang
+@version: 1.0
+2016年02月11日
 """
 
 
@@ -24,10 +27,13 @@ def __fetch_url(url, is_get=True, post_data=None):
     :param post_data: POST数据
     :return: 数据, 状态码（0为正确处理数据，-1为微信服务器无法响应，-2为无法处理微信服务器返回的数据）
     """
-    if is_get:
-        r = requests.get(url, timeout=request_timeout)
-    else:
-        r = requests.post(url, json.dumps(post_data, ensure_ascii=False), timeout=request_timeout)
+    try:
+        if is_get:
+            r = requests.get(url, timeout=request_timeout)
+        else:
+            r = requests.post(url, json.dumps(post_data, ensure_ascii=False), timeout=request_timeout)
+    except Exception:
+        return None, 0
 
     if r.status_code == 200:
         try:
@@ -227,6 +233,78 @@ def send_text_message(access_token,  target_open_id, text):
     return result
 
 
+def send_media_message(access_token, target_open_id, media_id, media_type):
+    """
+    发送媒体信息
+    :param access_token: 微信access_token
+    :param target_open_id: 目标用户open_id
+    :param media_id: 媒体id
+    :param media_type: 媒体类型，image，voice
+    :return:
+    """
+    target_url = 'https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=%s' % access_token
+    result = __get_data_use_api(target_url, False, {"touser": target_open_id, media_type: {"media_id": media_id}, "msgtype": media_type})
+    return result
+
+
+def update_media(access_token, media_type, media_name, media_data):
+    """
+    上传临时媒体素材
+    :param access_token: 微信access_token
+    :param media_type: 媒体类型，分别有图片（image）、语音（voice）、视频（video）和缩略图（thumb）
+    :param media_data: 媒体数据
+    :param media_name: 媒体名字
+    """
+    target_url = 'https://api.weixin.qq.com/cgi-bin/media/upload?access_token=%s&type=%s' % (access_token, media_type)
+    try:
+        r = requests.post(target_url, files={"media": (media_name, media_data)}, timeout=request_timeout)
+        if r.status_code == 200:
+            try:
+                data = json.loads(r.text)
+                code = 0
+            except Exception:
+                data = r.text
+                code = -2
+        else:
+            code = -1
+            data = None
+    except Exception:
+        code = -1
+        data = None
+
+    result = __handle_get_data(data, code)
+    return result
+
+
+def create_menu(access_token, menu_data):
+    """
+    创建菜单
+    :param access_token: 微信access_token
+    :param menu_data: 菜单数据
+    """
+    target_url = 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token=%s' % access_token
+    result = __get_data_use_api(target_url, False, {"button": menu_data})
+    return result
+
+
+def get_menu(access_token):
+    """
+    查询菜单
+    :param access_token: 微信access_token
+    """
+    target_url = 'https://api.weixin.qq.com/cgi-bin/menu/get?access_token=%s' % access_token
+    return __get_data_use_api(target_url)
+
+
+def delete_menu(access_token):
+    """
+    删除菜单
+    :param access_token: 微信access_token
+    """
+    target_url = 'https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=%s' % access_token
+    return __get_data_use_api(target_url)
+
+
 # def send_text_message(access_token, source_wechat, target_open_id, text):
 #     """
 #     发送文本消息
@@ -260,3 +338,11 @@ def send_text_message(access_token,  target_open_id, text):
 #     root.appendChild(attr)
 #
 #     print root.toprettyxml()
+
+
+class WechatApi(object):
+    """
+    微信服务器API接口封装类
+    """
+    def init(self, text):
+        pass
